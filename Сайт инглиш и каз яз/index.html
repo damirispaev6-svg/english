@@ -1,0 +1,681 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=yes">
+  <title>Spiral Til: Қазақша + English</title>
+  <style>
+    * {
+      margin: 0;
+      padding: 0;
+      box-sizing: border-box;
+      user-select: none;
+    }
+
+    body {
+      background: radial-gradient(circle at 20% 20%, #1a2a2f, #0d1a1f);
+      min-height: 100vh;
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      font-family: 'Segoe UI', 'Nunito', 'Poppins', system-ui, sans-serif;
+      padding: 20px;
+    }
+
+    /* MAIN GAME CONTAINER */
+    .game-container {
+      max-width: 800px;
+      width: 100%;
+      background: #FFFCF5;
+      border-radius: 64px;
+      box-shadow: 0 30px 40px -15px rgba(0,0,0,0.5);
+      overflow: hidden;
+      transition: all 0.2s;
+    }
+
+    /* SPLASH SCREEN (лого 3 секунды) */
+    .splash-screen {
+      position: fixed;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 100%;
+      background: linear-gradient(145deg, #1a4a38, #0a2a1f);
+      display: flex;
+      flex-direction: column;
+      justify-content: center;
+      align-items: center;
+      z-index: 1000;
+      transition: opacity 0.8s ease;
+      font-family: monospace;
+    }
+    .splash-logo {
+      font-size: 3.5rem;
+      font-weight: 800;
+      background: #FFF3CF;
+      display: inline-block;
+      padding: 25px 45px;
+      border-radius: 80px;
+      box-shadow: 0 20px 30px rgba(0,0,0,0.5);
+      color: #1F543E;
+      text-align: center;
+      letter-spacing: 2px;
+    }
+    .splash-sub {
+      margin-top: 30px;
+      color: #FFE5B4;
+      font-size: 1.3rem;
+      letter-spacing: 3px;
+    }
+    .splash-footer {
+      position: absolute;
+      bottom: 30px;
+      color: #bdd4bd;
+    }
+
+    /* language switcher */
+    .lang-switch {
+      background: #F3EDE1;
+      margin: 12px 20px 0;
+      border-radius: 60px;
+      padding: 8px 12px;
+      display: flex;
+      gap: 12px;
+      justify-content: center;
+    }
+    .lang-btn {
+      background: #E6DFCF;
+      border: none;
+      padding: 8px 24px;
+      border-radius: 40px;
+      font-weight: 700;
+      cursor: pointer;
+      font-family: inherit;
+      transition: 0.1s;
+      font-size: 0.9rem;
+    }
+    .lang-active {
+      background: #2F5D44;
+      color: white;
+      box-shadow: inset 0 1px 2px rgba(0,0,0,0.2);
+    }
+
+    /* header area */
+    .game-header {
+      background: #FFFFFFE6;
+      backdrop-filter: blur(6px);
+      padding: 18px 24px 14px;
+      border-bottom: 2px solid #FFDEB0;
+      display: flex;
+      flex-wrap: wrap;
+      justify-content: space-between;
+      align-items: center;
+      gap: 12px;
+    }
+
+    .title-block {
+      display: flex;
+      align-items: baseline;
+      gap: 12px;
+      flex-wrap: wrap;
+    }
+
+    .game-logo {
+      font-weight: 800;
+      font-size: 1.4rem;
+      background: linear-gradient(135deg, #2C7A4D, #6DBE45);
+      background-clip: text;
+      -webkit-background-clip: text;
+      color: transparent;
+    }
+
+    .level-badge {
+      background: #2F5D44;
+      padding: 5px 16px;
+      border-radius: 40px;
+      color: #FFF2D7;
+      font-weight: 700;
+      font-size: 0.85rem;
+    }
+
+    /* stats */
+    .stats-panel {
+      display: flex;
+      align-items: center;
+      gap: 20px;
+      background: #FEF6E8;
+      padding: 5px 18px;
+      border-radius: 60px;
+    }
+
+    .hearts-box {
+      display: flex;
+      gap: 6px;
+    }
+    .heart {
+      font-size: 24px;
+      transition: 0.1s;
+    }
+    .heart-lost {
+      opacity: 0.3;
+      filter: grayscale(0.6);
+    }
+    .score-box {
+      background: #3A2E24;
+      padding: 4px 12px;
+      border-radius: 32px;
+      color: #FFE1A0;
+      font-weight: 800;
+    }
+    .sound-btn {
+      background: #E5D8C4;
+      border: none;
+      border-radius: 30px;
+      padding: 5px 12px;
+      font-size: 0.75rem;
+      font-weight: 600;
+      cursor: pointer;
+    }
+
+    /* progress inside level */
+    .level-progress {
+      background: #F3EDE1;
+      margin: 16px 24px 0;
+      border-radius: 60px;
+      padding: 12px 20px;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      flex-wrap: wrap;
+      gap: 12px;
+    }
+    .words-counter {
+      font-weight: 700;
+      background: #D9E0D4;
+      padding: 4px 16px;
+      border-radius: 40px;
+      font-size: 0.85rem;
+      color: #2B4B2F;
+    }
+    .progress-bar-bg {
+      flex: 1;
+      height: 8px;
+      background: #D0C6B4;
+      border-radius: 10px;
+      overflow: hidden;
+      min-width: 120px;
+    }
+    .progress-fill {
+      width: 0%;
+      height: 100%;
+      background: #4CAF7D;
+      border-radius: 10px;
+      transition: width 0.2s;
+    }
+
+    /* main word card */
+    .question-area {
+      text-align: center;
+      padding: 36px 20px 24px;
+    }
+    .target-word {
+      font-size: 3.5rem;
+      font-weight: 800;
+      color: #1D3D30;
+      background: white;
+      display: inline-block;
+      padding: 0.2em 0.6em;
+      border-radius: 80px;
+      box-shadow: 0 6px 14px rgba(0,0,0,0.05);
+      margin-bottom: 12px;
+    }
+    .hint-text {
+      font-size: 0.8rem;
+      background: #FCF3E3;
+      display: inline-block;
+      padding: 5px 18px;
+      border-radius: 60px;
+      color: #AD7A42;
+    }
+
+    /* answers */
+    .answers-list {
+      padding: 12px 24px 28px;
+      display: flex;
+      flex-direction: column;
+      gap: 14px;
+    }
+    .answer-option {
+      background: #ECF2EE;
+      border: 1.5px solid #DBE5DE;
+      border-radius: 100px;
+      padding: 14px 20px;
+      font-size: 1.1rem;
+      font-weight: 600;
+      color: #2A5A45;
+      text-align: center;
+      cursor: pointer;
+      transition: 0.1s;
+    }
+    .answer-option:hover {
+      background: #E1EAE4;
+      transform: scale(0.98);
+    }
+    .correct-highlight {
+      background: #4CAF7D !important;
+      color: white !important;
+      border-color: #2E7D5E !important;
+    }
+    .wrong-highlight {
+      background: #E67E7E !important;
+      color: white !important;
+      border-color: #B13E3E !important;
+    }
+
+    .feedback-area {
+      text-align: center;
+      padding: 4px 24px 16px;
+    }
+    .msg-card {
+      background: #EFF3E8;
+      border-radius: 50px;
+      padding: 10px;
+      font-weight: 600;
+      font-size: 0.9rem;
+    }
+    .reset-footer {
+      display: flex;
+      justify-content: center;
+      padding: 12px 24px 24px;
+    }
+    .reset-btn {
+      background: #D9CAB5;
+      border: none;
+      padding: 10px 26px;
+      border-radius: 40px;
+      font-weight: 700;
+      cursor: pointer;
+      font-family: inherit;
+    }
+    footer {
+      background: #FBF4EA;
+      text-align: center;
+      font-size: 0.65rem;
+      padding: 12px;
+      color: #B28B5E;
+    }
+    @media (max-width: 550px) {
+      .target-word { font-size: 2.3rem; }
+      .answer-option { font-size: 0.95rem; }
+    }
+  </style>
+</head>
+<body>
+
+<div class="splash-screen" id="splashScreen">
+  <div class="splash-logo">ҚАЗАҚ<br>ЖӘНЕ АҒЫЛШЫН</div>
+  <div class="splash-sub">SPIRAL TIL • ENGLISH & ҚАЗАҚ</div>
+  <div class="splash-footer">3 секунд</div>
+</div>
+
+<div class="game-container" id="gameContainer" style="display: none;">
+  <!-- language switcher -->
+  <div class="lang-switch">
+    <button class="lang-btn" id="kazLangBtn">🇰🇿 ҚАЗАҚ ТІЛІ</button>
+    <button class="lang-btn" id="engLangBtn">🇬🇧 ENGLISH</button>
+  </div>
+
+  <div class="game-header">
+    <div class="title-block">
+      <div class="game-logo" id="langLogo">🌀 TIL SPIRAL</div>
+      <div class="level-badge" id="levelNumber">ДЕҢГЕЙ 1 / 100</div>
+    </div>
+    <div class="stats-panel">
+      <div class="hearts-box" id="heartsContainer"></div>
+      <div class="score-box">⭐ <span id="totalScore">0</span></div>
+      <button class="sound-btn" id="toggleSoundBtn">🔊 Дыбыс</button>
+    </div>
+  </div>
+
+  <div class="level-progress">
+    <div class="words-counter">📖 <span id="wordsLearnedInLevel">0</span> / <span id="totalWordsInLevel">10</span> сөз</div>
+    <div class="progress-bar-bg"><div class="progress-fill" id="levelProgressFill"></div></div>
+  </div>
+
+  <div class="question-area">
+    <div class="target-word" id="currentWord">жүктелуде...</div>
+    <div class="hint-text" id="hintMsg">🇰🇿 аударманы таңдаңыз → авто-келесі</div>
+  </div>
+
+  <div class="answers-list" id="answersContainer">
+    <div class="answer-option" data-idx="0">—</div>
+    <div class="answer-option" data-idx="1">—</div>
+    <div class="answer-option" data-idx="2">—</div>
+  </div>
+
+  <div class="feedback-area">
+    <div class="msg-card" id="feedbackMsg">✨ 10 сөзді меңгеріп, деңгейді аяқтаңыз ✨</div>
+  </div>
+  <div class="reset-footer">
+    <button class="reset-btn" id="fullResetBtn">🔄 Толық қалпына келтіру</button>
+  </div>
+  <footer>әр деңгейде 10 сөз · дұрыс → жасыл, қате → қызыл · дыбыс эффектілері</footer>
+</div>
+
+<script>
+  // ======================= СЛОВАРНЫЕ БАЗЫ (1000 сөз: 100 деңгей × 10) =======================
+  // ҚАЗАҚ ТІЛІ БАЗАСЫ (сөз және аударма)
+  const KZ_WORDS = [
+    "алма","көлік","үй","бақытты","үлкен","көк","жүгіру","жылдам","күн","ай",
+    "су","от","ағаш","гүл","құс","балық","дос","ана","әке","махаббат",
+    "күшті","әлсіз","күн","түн","жарық","қараңғы","арман","күлімсіреу","мұңды","сұлулық",
+    "ақылды","жұмыс","ойнау","оқу","жазу","үйрену","саяхат","дәмді","суық","ыстық",
+    "жаңа","ескі","жас","тыныш","қатты","батыл","мейірімді","қала","ауыл","аспан",
+    "мұхит","тау","өзен","орман","жұлдыз","бұлт","жел","тас","жапырақ","жол"
+  ];
+  const KZ_TRANSLATIONS = [
+    "яблоко","машина","дом","счастливый","большой","синий","бежать","быстрый","солнце","луна",
+    "вода","огонь","дерево","цветок","птица","рыба","друг","мама","папа","любовь",
+    "сильный","слабый","день","ночь","свет","темнота","мечта","улыбка","грустный","красота",
+    "умный","работа","играть","читать","писать","учить","путешествовать","вкусный","холодный","горячий",
+    "новый","старый","молодой","тихий","громкий","храбрый","добрый","город","деревня","небо",
+    "океан","гора","река","лес","звезда","облако","ветер","камень","лист","дорога"
+  ];
+
+  // АҒЫЛШЫН ТІЛІ БАЗАСЫ
+  const EN_WORDS = [
+    "apple","car","house","happy","big","blue","run","fast","sun","moon",
+    "water","fire","tree","flower","bird","fish","friend","mother","father","love",
+    "strong","weak","day","night","light","dark","dream","smile","sad","beauty",
+    "clever","work","play","read","write","learn","travel","delicious","cold","hot",
+    "new","old","young","quiet","loud","brave","kind","city","village","sky",
+    "ocean","mountain","river","forest","star","cloud","wind","stone","leaf","road"
+  ];
+  const EN_TRANSLATIONS = [
+    "яблоко","машина","дом","счастливый","большой","синий","бежать","быстрый","солнце","луна",
+    "вода","огонь","дерево","цветок","птица","рыба","друг","мама","папа","любовь",
+    "сильный","слабый","день","ночь","свет","темнота","мечта","улыбка","грустный","красота",
+    "умный","работа","играть","читать","писать","учить","путешествовать","вкусный","cold","горячий",
+    "новый","старый","молодой","тихий","громкий","храбрый","добрый","город","деревня","небо",
+    "океан","гора","река","лес","звезда","облако","ветер","камень","лист","дорога"
+  ];
+
+  // 100 деңгейге 1000 сөз жасау (әр деңгейде 10 сөз)
+  function buildFullDictionary(wordsArray, transArray) {
+    let full = [];
+    for (let level = 0; level < 100; level++) {
+      for (let i = 0; i < 10; i++) {
+        let idx = (level * 7 + i) % wordsArray.length;
+        full.push({ word: wordsArray[idx], translation: transArray[idx] });
+      }
+    }
+    return full;
+  }
+
+  const KZ_DICT = buildFullDictionary(KZ_WORDS, KZ_TRANSLATIONS);
+  const EN_DICT = buildFullDictionary(EN_WORDS, EN_TRANSLATIONS);
+
+  // Глобальды күй
+  let currentLang = "kz";          // "kz" немесе "en"
+  let currentLevel = 1;
+  let currentDict = KZ_DICT;
+  let wordsInLevel = [];
+  let currentWordIdx = 0;
+  let currentOptions = [];
+  let answered = false;
+  let autoTimer = null;
+  let hearts = 5;
+  let totalScore = 0;
+  let gameActive = true;
+  
+  let soundEnabled = true;
+  let audioCtx = null;
+
+  // DOM элементтері
+  const splash = document.getElementById("splashScreen");
+  const gameContainer = document.getElementById("gameContainer");
+  const levelNumberSpan = document.getElementById("levelNumber");
+  const wordsLearnedSpan = document.getElementById("wordsLearnedInLevel");
+  const totalWordsSpan = document.getElementById("totalWordsInLevel");
+  const progressFill = document.getElementById("levelProgressFill");
+  const currentWordSpan = document.getElementById("currentWord");
+  const answersDiv = document.getElementById("answersContainer");
+  const feedbackMsgDiv = document.getElementById("feedbackMsg");
+  const heartsContainer = document.getElementById("heartsContainer");
+  const totalScoreSpan = document.getElementById("totalScore");
+  const fullResetBtn = document.getElementById("fullResetBtn");
+  const toggleSoundBtn = document.getElementById("toggleSoundBtn");
+  const kazLangBtn = document.getElementById("kazLangBtn");
+  const engLangBtn = document.getElementById("engLangBtn");
+  const langLogo = document.getElementById("langLogo");
+  const hintMsgSpan = document.getElementById("hintMsg");
+
+  // Дыбыс эффектілері (Web Audio)
+  function playBeep(type) {
+    if (!soundEnabled) return;
+    try {
+      if (!audioCtx) audioCtx = new (window.AudioContext || window.webkitAudioContext)();
+      if (audioCtx.state === 'suspended') audioCtx.resume();
+      const now = audioCtx.currentTime;
+      const osc = audioCtx.createOscillator();
+      const gain = audioCtx.createGain();
+      osc.connect(gain);
+      gain.connect(audioCtx.destination);
+      if (type === 'correct') {
+        osc.frequency.value = 880;
+        gain.gain.value = 0.25;
+        gain.gain.exponentialRampToValueAtTime(0.0001, now + 0.4);
+        osc.start();
+        osc.stop(now + 0.35);
+        const osc2 = audioCtx.createOscillator();
+        const gain2 = audioCtx.createGain();
+        osc2.connect(gain2);
+        gain2.connect(audioCtx.destination);
+        osc2.frequency.value = 1046.5;
+        gain2.gain.value = 0.2;
+        gain2.gain.exponentialRampToValueAtTime(0.0001, now + 0.3);
+        osc2.start(now + 0.12);
+        osc2.stop(now + 0.4);
+      } else if (type === 'wrong') {
+        osc.frequency.value = 440;
+        gain.gain.value = 0.3;
+        gain.gain.exponentialRampToValueAtTime(0.0001, now + 0.5);
+        osc.start();
+        osc.stop(now + 0.45);
+      }
+    } catch(e) { console.log("дыбыс қатесі"); }
+  }
+
+  function updateHeartsUI() {
+    heartsContainer.innerHTML = "";
+    for (let i=0; i<5; i++) {
+      let span = document.createElement("span");
+      span.className = "heart";
+      if(i < hearts) span.textContent = "❤️";
+      else { span.textContent = "🖤"; span.classList.add("heart-lost"); }
+      heartsContainer.appendChild(span);
+    }
+  }
+
+  function loadWordsForLevel() {
+    const start = (currentLevel-1) * 10;
+    wordsInLevel = currentDict.slice(start, start+10);
+    currentWordIdx = 0;
+  }
+
+  function generateOptions(correctTrans, currentWordStr) {
+    let candidates = [];
+    for(let i=0; i<currentDict.length; i++) {
+      if(currentDict[i].translation !== correctTrans) candidates.push(currentDict[i].translation);
+    }
+    let shuffled = [...candidates];
+    for(let i=shuffled.length-1; i>0; i--) {
+      let j = Math.floor(Math.random()*(i+1));
+      [shuffled[i], shuffled[j]] = [shuffled[j], shuffled[i]];
+    }
+    let dist = shuffled.slice(0,2);
+    if(dist.length<2) dist=["аударма","нұсқа"];
+    let opts = [correctTrans, ...dist];
+    for(let i=opts.length-1; i>0; i--) {
+      let j = Math.floor(Math.random()*(i+1));
+      [opts[i], opts[j]] = [opts[j], opts[i]];
+    }
+    return opts;
+  }
+
+  function updateProgressUI() {
+    wordsLearnedSpan.innerText = currentWordIdx;
+    totalWordsSpan.innerText = 10;
+    let percent = (currentWordIdx / 10) * 100;
+    progressFill.style.width = percent + "%";
+  }
+
+  function loadCurrentWord() {
+    if(!gameActive) return;
+    if(currentWordIdx >= 10) { completeLevel(); return; }
+    let wordObj = wordsInLevel[currentWordIdx];
+    currentWordSpan.innerText = wordObj.word;
+    currentOptions = generateOptions(wordObj.translation, wordObj.word);
+    let btns = answersDiv.querySelectorAll(".answer-option");
+    btns.forEach((btn, idx) => {
+      btn.innerText = currentOptions[idx];
+      btn.classList.remove("correct-highlight","wrong-highlight");
+      btn.style.pointerEvents = "auto";
+    });
+    answered = false;
+    feedbackMsgDiv.innerHTML = currentLang === "kz" ? "✨ аударманы таңдаңыз ✨" : "✨ choose translation ✨";
+    updateProgressUI();
+  }
+
+  async function handleAnswer(selectedIdx) {
+    if(!gameActive || answered) return;
+    let correctTrans = wordsInLevel[currentWordIdx].translation;
+    let selected = currentOptions[selectedIdx];
+    let isCorrect = (selected === correctTrans);
+    let btns = answersDiv.querySelectorAll(".answer-option");
+    btns.forEach(btn => btn.style.pointerEvents = "none");
+    
+    if(isCorrect) {
+      playBeep('correct');
+      btns[selectedIdx].classList.add("correct-highlight");
+      totalScore += 10;
+      totalScoreSpan.innerText = totalScore;
+      feedbackMsgDiv.innerHTML = "✅ Дұрыс! +10 ұпай";
+      feedbackMsgDiv.style.background = "#DAEFD8";
+    } else {
+      playBeep('wrong');
+      btns[selectedIdx].classList.add("wrong-highlight");
+      hearts--;
+      updateHeartsUI();
+      btns.forEach(btn => { if(btn.innerText === correctTrans) btn.classList.add("correct-highlight"); });
+      feedbackMsgDiv.innerHTML = `❌ Қате! Дұрыс жауап: «${correctTrans}». Жүректер: ${hearts}`;
+      feedbackMsgDiv.style.background = "#FCE1E1";
+      if(hearts <= 0) {
+        gameActive = false;
+        feedbackMsgDiv.innerHTML = "💀 Ойын аяқталды. Толық қалпына келтіруді басыңыз 💀";
+        return;
+      }
+    }
+    answered = true;
+    if(autoTimer) clearTimeout(autoTimer);
+    autoTimer = setTimeout(() => {
+      if(!gameActive) return;
+      currentWordIdx++;
+      updateProgressUI();
+      if(currentWordIdx >= 10) completeLevel();
+      else loadCurrentWord();
+      autoTimer = null;
+    }, 700);
+  }
+
+  function completeLevel() {
+    if(!gameActive) return;
+    feedbackMsgDiv.innerHTML = `🎉 ${currentLang === "kz" ? "ДЕҢГЕЙ" : "LEVEL"} ${currentLevel} АЯҚТАЛДЫ! +50 ұпай 🎉`;
+    feedbackMsgDiv.style.background = "#FFE2B5";
+    totalScore += 50;
+    totalScoreSpan.innerText = totalScore;
+    if(currentLevel < 100) {
+      currentLevel++;
+      loadWordsForLevel();
+      currentWordIdx = 0;
+      loadCurrentWord();
+      levelNumberSpan.innerText = currentLang === "kz" ? `ДЕҢГЕЙ ${currentLevel} / 100` : `LEVEL ${currentLevel} / 100`;
+      updateProgressUI();
+    } else {
+      feedbackMsgDiv.innerHTML = "🏆 ҰЛЫ ЖЕҢІС! Барлық 100 деңгей аяқталды! 🏆";
+      gameActive = false;
+    }
+  }
+
+  function fullReset() {
+    if(autoTimer) clearTimeout(autoTimer);
+    currentLevel = 1;
+    hearts = 5;
+    totalScore = 0;
+    gameActive = true;
+    answered = false;
+    totalScoreSpan.innerText = totalScore;
+    updateHeartsUI();
+    loadWordsForLevel();
+    currentWordIdx = 0;
+    loadCurrentWord();
+    levelNumberSpan.innerText = currentLang === "kz" ? `ДЕҢГЕЙ ${currentLevel} / 100` : `LEVEL ${currentLevel} / 100`;
+    updateProgressUI();
+    feedbackMsgDiv.innerHTML = currentLang === "kz" ? "🔄 Толық қалпына келтірілді! 1-деңгейден бастаңыз" : "🔄 Full reset! Start from level 1";
+    feedbackMsgDiv.style.background = "#EFF3E8";
+    let btns = answersDiv.querySelectorAll(".answer-option");
+    btns.forEach(btn => { btn.style.pointerEvents = "auto"; btn.classList.remove("correct-highlight","wrong-highlight"); });
+  }
+
+  function switchLanguage(lang) {
+    if(autoTimer) clearTimeout(autoTimer);
+    currentLang = lang;
+    if(lang === "en") {
+      currentDict = EN_DICT;
+      langLogo.innerText = "🌀 ENGLISH SPIRAL";
+      hintMsgSpan.innerHTML = "🇬🇧 choose translation → auto next";
+      levelNumberSpan.innerText = `LEVEL ${currentLevel} / 100`;
+      feedbackMsgDiv.innerHTML = "Switched to ENGLISH mode";
+    } else {
+      currentDict = KZ_DICT;
+      langLogo.innerText = "🌀 ҚАЗАҚ СПИРАЛЬ";
+      hintMsgSpan.innerHTML = "🇰🇿 аударманы таңдаңыз → авто-келесі";
+      levelNumberSpan.innerText = `ДЕҢГЕЙ ${currentLevel} / 100`;
+      feedbackMsgDiv.innerHTML = "Қазақ тілі режиміне ауыстыңыз";
+    }
+    fullReset();
+  }
+
+  function attachEvents() {
+    let btns = answersDiv.querySelectorAll(".answer-option");
+    btns.forEach((btn, idx) => {
+      let newBtn = btn.cloneNode(true);
+      btn.parentNode.replaceChild(newBtn, btn);
+      newBtn.addEventListener("click", () => handleAnswer(idx));
+    });
+    fullResetBtn.addEventListener("click", fullReset);
+    toggleSoundBtn.addEventListener("click", () => {
+      soundEnabled = !soundEnabled;
+      toggleSoundBtn.innerText = soundEnabled ? "🔊 Дыбыс" : "🔇 Дыбыс өшік";
+    });
+    kazLangBtn.addEventListener("click", () => switchLanguage("kz"));
+    engLangBtn.addEventListener("click", () => switchLanguage("en"));
+  }
+
+  // Splash экран 3 секунд
+  setTimeout(() => {
+    splash.style.opacity = "0";
+    setTimeout(() => {
+      splash.style.display = "none";
+      gameContainer.style.display = "block";
+      attachEvents();
+      fullReset();
+    }, 800);
+  }, 3000);
+
+  document.body.addEventListener("click", () => {
+    if(audioCtx && audioCtx.state === 'suspended') audioCtx.resume();
+  }, { once: true });
+</script>
+</body>
+</html>
